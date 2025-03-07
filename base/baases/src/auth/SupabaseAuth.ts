@@ -1,9 +1,9 @@
 import { ref, computed } from 'vue';
-import type { AuthComposable } from './authComposable';
-import type { MyUser, MySession } from '../types/authTypes';
+import type { IAuth } from './IAuth';
+import type { MyUser, MySession } from './Types';
 import { createClient, type User, type Session } from '@supabase/supabase-js';
 
-export function useSupabase(): AuthComposable {
+export function SupabaseAuth(): IAuth {
   const supabaseUrl = 'https://YOUR_SUPABASE_URL';
   const supabaseKey = 'YOUR_SUPABASE_KEY';
   const supabase = createClient(supabaseUrl, supabaseKey);
@@ -12,6 +12,10 @@ export function useSupabase(): AuthComposable {
   const currentSession = ref<MySession | null>(null);
 
   const isAuthenticated = computed(() => user.value !== null);
+
+  async function init(): Promise<boolean> {
+    throw new Error('Not implemented');
+  }
 
   async function login(email: string, password: string) {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
@@ -44,7 +48,7 @@ export function useSupabase(): AuthComposable {
     currentSession.value = null;
   }
 
-  async function register(email: string, password: string) {
+  async function signin(email: string, password: string) {
     const { data, error } = await supabase.auth.signUp({ email, password });
     const { user: registeredUser, session } = data;
 
@@ -66,12 +70,23 @@ export function useSupabase(): AuthComposable {
     };
   }
 
+  async function updateEmail(email: string, password: string) {
+    throw new Error('Not implemented');
+  }
+
+  async function updatePassword(newPassword: string, currentPassword: string) {
+    throw new Error('Not implemented');
+  }
+
   return {
     user,
     currentSession,
     isAuthenticated,
+    init,
     login,
     logout,
-    register,
+    signin,
+    updateEmail,
+    updatePassword,
   };
 }

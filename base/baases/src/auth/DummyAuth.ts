@@ -20,7 +20,7 @@ const registeredUsers = [
   }
 ];
 
-export function DummyAuth(asd: string): IAuth {
+export function DummyAuth(): IAuth {
   const user = ref<MyUser | null>(null);
   const currentSession = ref<MySession | null>(null);
   const isAuthenticated = computed(() => user.value !== null);

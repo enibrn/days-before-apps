@@ -1,4 +1,5 @@
-import type { BaasType } from '../common/ResolverService';
+import { type BaasType, resolveBaasType } from '../common/ResolverService';
+
 import type { BaasConfigs } from '../common/Types';
 import type { IAuth } from './IAuth';
 
@@ -6,7 +7,9 @@ import { AppwriteAuth } from './AppwriteAuth';
 import { SupabaseAuth } from './SupabaseAuth';
 import { DummyAuth } from './DummyAuth';
 
-export function getAuth(type: BaasType, configs: BaasConfigs): IAuth {
+export function resolveAuth(type: unknown, configs: BaasConfigs): IAuth {
+  const safeType = resolveBaasType(type);
+  
   const getDictionary = (configs: BaasConfigs): Record<BaasType, IAuth> => {
     return {
       appwrite: AppwriteAuth(configs),
@@ -16,5 +19,5 @@ export function getAuth(type: BaasType, configs: BaasConfigs): IAuth {
   }
 
   const dictionary = getDictionary(configs);
-  return dictionary[type];
+  return dictionary[safeType];
 }

@@ -1,6 +1,6 @@
 import { ref, computed } from 'vue';
 
-import type { IAuth } from './IAuth';
+import type { IAuthService } from './IAuthService';
 import type { MyUser, MySession } from './Types';
 
 import type { BaasConfigs } from '../common/Types';
@@ -23,7 +23,7 @@ const registeredUsers = [
   }
 ];
 
-export function DummyAuth(configs: BaasConfigs): IAuth {
+export function DummyAuthService(configs: BaasConfigs): IAuthService {
   const user = ref<MyUser | null>(null);
   const currentSession = ref<MySession | null>(null);
   const isAuthenticated = computed(() => user.value !== null);

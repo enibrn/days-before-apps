@@ -1,7 +1,7 @@
 import type { Ref, ComputedRef } from 'vue';
 import type { MyUser, MySession } from './Types';
 
-export interface IAuth {
+export interface IAuthService {
   user: Ref<MyUser | null>;
   currentSession: Ref<MySession | null>;
   isAuthenticated: ComputedRef<boolean>;

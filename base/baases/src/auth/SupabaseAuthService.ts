@@ -1,13 +1,13 @@
 import { ref, computed } from 'vue';
 import { createClient, type User, type Session } from '@supabase/supabase-js';
 
-import type { IAuth } from './IAuth';
+import type { IAuthService } from './IAuthService';
 import type { MyUser, MySession } from './Types';
 
 import type { BaasConfigs } from '../common/Types';
 import { SupabaseService } from '../common/SupabaseService';
 
-export function SupabaseAuth(configs: BaasConfigs): IAuth {
+export function SupabaseAuthService(configs: BaasConfigs): IAuthService {
   const supabase = new SupabaseService(configs);
 
   const user = ref<MyUser | null>(null);

@@ -1,7 +1,7 @@
 import { Client, Databases, Account } from 'appwrite';
 import { type BaasConfigs } from './Types';
 
-class AppwriteService {
+export class AppwriteService {
   public account: Account;
   public databases: Databases;
 
@@ -14,10 +14,4 @@ class AppwriteService {
     this.account = new Account(client);
     this.databases = new Databases(client);
   }
-
-  // async getFile(bucketId, fileId) {
-  //   return await this.storage.getFileDownload(bucketId, fileId);
-  // }
 }
-
-export default AppwriteService;

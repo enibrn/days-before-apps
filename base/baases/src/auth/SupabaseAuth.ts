@@ -1,16 +1,17 @@
 import { ref, computed } from 'vue';
-import type { IAuth } from './IAuth';
-import type { MyUser, MySession } from './Types';
 import { createClient, type User, type Session } from '@supabase/supabase-js';
 
-export function SupabaseAuth(): IAuth {
-  const supabaseUrl = 'https://YOUR_SUPABASE_URL';
-  const supabaseKey = 'YOUR_SUPABASE_KEY';
-  const supabase = createClient(supabaseUrl, supabaseKey);
+import type { IAuth } from './IAuth';
+import type { MyUser, MySession } from './Types';
+
+import type { BaasConfigs } from '../common/Types';
+import { SupabaseService } from '../common/SupabaseService';
+
+export function SupabaseAuth(configs: BaasConfigs): IAuth {
+  const supabase = new SupabaseService(configs);
 
   const user = ref<MyUser | null>(null);
   const currentSession = ref<MySession | null>(null);
-
   const isAuthenticated = computed(() => user.value !== null);
 
   async function init(): Promise<boolean> {
@@ -18,7 +19,7 @@ export function SupabaseAuth(): IAuth {
   }
 
   async function login(email: string, password: string) {
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = await supabase.client.auth.signInWithPassword({ email, password });
     const { user: loggedInUser, session } = data || {};
     if (error || !loggedInUser || !session) {
       console.error('Errore durante il login:', error);
@@ -39,7 +40,7 @@ export function SupabaseAuth(): IAuth {
   }
 
   async function logout() {
-    const { error } = await supabase.auth.signOut();
+    const { error } = await supabase.client.auth.signOut();
     if (error) {
       console.error('Errore durante il logout:', error);
       return;
@@ -49,7 +50,7 @@ export function SupabaseAuth(): IAuth {
   }
 
   async function signin(email: string, password: string) {
-    const { data, error } = await supabase.auth.signUp({ email, password });
+    const { data, error } = await supabase.client.auth.signUp({ email, password });
     const { user: registeredUser, session } = data;
 
     if (error || !registeredUser || !session) {

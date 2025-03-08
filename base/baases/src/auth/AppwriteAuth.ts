@@ -1,9 +1,11 @@
 import { ref, computed } from 'vue';
+import { ID, type Models } from 'appwrite';
+
 import type { IAuth } from './IAuth';
 import type { MyUser, MySession } from './Types';
-import { ID, type Models } from 'appwrite';
+
 import type { BaasConfigs } from '../common/Types';
-import AppwriteService from '../common/AppwriteService';
+import { AppwriteService } from '../common/AppwriteService';
 
 export function AppwriteAuth(configs: BaasConfigs): IAuth {
   const appwrite = new AppwriteService(configs);

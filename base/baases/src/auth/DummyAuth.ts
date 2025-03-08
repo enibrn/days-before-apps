@@ -1,6 +1,9 @@
 import { ref, computed } from 'vue';
+
 import type { IAuth } from './IAuth';
 import type { MyUser, MySession } from './Types';
+
+import type { BaasConfigs } from '../common/Types';
 
 const registeredUsers = [
   {
@@ -20,7 +23,7 @@ const registeredUsers = [
   }
 ];
 
-export function DummyAuth(): IAuth {
+export function DummyAuth(configs: BaasConfigs): IAuth {
   const user = ref<MyUser | null>(null);
   const currentSession = ref<MySession | null>(null);
   const isAuthenticated = computed(() => user.value !== null);
@@ -32,7 +35,7 @@ export function DummyAuth(): IAuth {
       //randomly select a user
       const userIndex = Math.floor(Math.random() * registeredUsers.length);
       user.value = { id: registeredUsers[userIndex].id, email: registeredUsers[userIndex].email };
-      currentSession.value = { token: `dummy-token-${registeredUsers[userIndex].id}` };
+      currentSession.value = castDummyToken(registeredUsers[userIndex].id, configs);
       return true;
     } else {
       return false;
@@ -45,7 +48,7 @@ export function DummyAuth(): IAuth {
     );
     if (foundUser) {
       user.value = { id: foundUser.id, email: foundUser.email };
-      currentSession.value = { token: `dummy-token-${foundUser.id}` };
+      currentSession.value = castDummyToken(foundUser.id, configs);
     } else {
       throw new Error('Credenziali non valide');
     }
@@ -64,7 +67,7 @@ export function DummyAuth(): IAuth {
     const newUser = { id: `${Date.now()}`, email, password };
     registeredUsers.push(newUser);
     user.value = { id: newUser.id, email: newUser.email };
-    currentSession.value = { token: `dummy-token-${newUser.id}` };
+    currentSession.value = castDummyToken(newUser.id, configs);
   }
 
   async function updateEmail(email: string, password: string) {
@@ -88,6 +91,14 @@ export function DummyAuth(): IAuth {
       throw new Error('Password corrente non valida');
     }
     foundUser.password = newPassword;
+  }
+
+  function castDummyToken(id: string, configs: BaasConfigs): MySession {
+    const token = `dummy-token-${configs.endpoint}-${configs.project}-${id}`;
+
+    return {
+      token,
+    };
   }
 
   return {

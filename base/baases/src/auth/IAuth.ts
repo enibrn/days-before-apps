@@ -5,6 +5,7 @@ export interface IAuth {
   user: Ref<MyUser | null>;
   currentSession: Ref<MySession | null>;
   isAuthenticated: ComputedRef<boolean>;
+
   init(): Promise<boolean>;
   login(email: string, password: string): Promise<void>;
   logout(): Promise<void>;

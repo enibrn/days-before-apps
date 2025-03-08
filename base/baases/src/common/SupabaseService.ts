@@ -5,6 +5,6 @@ export class SupabaseService {
   public client: SupabaseClient;
 
   constructor(configs: BaasConfigs) {
-    this.client = createClient(configs.endpoint, configs.project);
+    this.client = createClient(configs.endpointUrl, configs.projectKey);
   }
 }

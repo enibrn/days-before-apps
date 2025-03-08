@@ -1,4 +1,4 @@
 export type BaasConfigs = {
-  endpoint: string;
-  project: string;
+  endpointUrl: string;
+  projectKey: string;
 }; 

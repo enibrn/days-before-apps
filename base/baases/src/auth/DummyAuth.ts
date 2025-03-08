@@ -94,7 +94,7 @@ export function DummyAuth(configs: BaasConfigs): IAuth {
   }
 
   function castDummyToken(id: string, configs: BaasConfigs): MySession {
-    const token = `dummy-token-${configs.endpoint}-${configs.project}-${id}`;
+    const token = `dummy-token-${configs.endpointUrl}-${configs.projectKey}-${id}`;
 
     return {
       token,

@@ -8,8 +8,8 @@ export class AppwriteService {
   constructor(configs: BaasConfigs) {
     const client = new Client();
     client
-      .setEndpoint(configs.endpoint,)
-      .setProject(configs.project);
+      .setEndpoint(configs.endpointUrl,)
+      .setProject(configs.projectKey);
 
     this.account = new Account(client);
     this.databases = new Databases(client);

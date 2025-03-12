@@ -1,115 +1,60 @@
-import { ref, computed } from 'vue';
+import { AuthService } from './AuthService';
+import type { MyUser, MySession, BaasAuthResult } from './Types';
 
-import type { IAuthService } from './IAuthService';
-import type { MyUser, MySession } from './Types';
+import type { BaasConfigs, OperationResult } from '../common/Types';
 
-import type { BaasConfigs } from '../common/Types';
+import { DummyBaasService, type DummyUser, type DummySession } from '../common/DummyBaasService';
 
-const registeredUsers = [
-  {
-    id: "1",
-    email: "dummy1@example.com",
-    password: "password1"
-  },
-  {
-    id: "2",
-    email: "dummy2@example.com",
-    password: "password2"
-  },
-  {
-    id: "3",
-    email: "dummy3@example.com",
-    password: "password3"
-  }
-];
+export class DummyAuthService extends AuthService<DummyUser, DummySession> {
+  private dummyService: DummyBaasService;
 
-export function DummyAuthService(configs: BaasConfigs): IAuthService {
-  const user = ref<MyUser | null>(null);
-  const currentSession = ref<MySession | null>(null);
-  const isAuthenticated = computed(() => user.value !== null);
-
-  async function init(): Promise<boolean> {
-    //randomly decide if the user is authenticated or not
-    const random = Math.random();
-    if (random > 0.5) {
-      //randomly select a user
-      const userIndex = Math.floor(Math.random() * registeredUsers.length);
-      user.value = { id: registeredUsers[userIndex].id, email: registeredUsers[userIndex].email };
-      currentSession.value = castDummyToken(registeredUsers[userIndex].id, configs);
-      return true;
-    } else {
-      return false;
-    }
+  constructor(configs: BaasConfigs) {
+    super(configs);
+    this.dummyService = new DummyBaasService(configs);
   }
 
-  async function login(email: string, password: string): Promise<void> {
-    const foundUser = registeredUsers.find(
-      (u) => u.email === email && u.password === password
-    );
-    if (foundUser) {
-      user.value = { id: foundUser.id, email: foundUser.email };
-      currentSession.value = castDummyToken(foundUser.id, configs);
-    } else {
-      throw new Error('Credenziali non valide');
-    }
-  }
-
-  async function logout(): Promise<void> {
-    user.value = null;
-    currentSession.value = null;
-  }
-
-  async function signin(email: string, password: string): Promise<void> {
-    const existingUser = registeredUsers.find((u) => u.email === email);
-    if (existingUser) {
-      throw new Error('Utente già registrato');
-    }
-    const newUser = { id: `${Date.now()}`, email, password };
-    registeredUsers.push(newUser);
-    user.value = { id: newUser.id, email: newUser.email };
-    currentSession.value = castDummyToken(newUser.id, configs);
-  }
-
-  async function updateEmail(email: string, password: string) {
-    if (!user.value) return;
-    const foundUser = registeredUsers.find(
-      (u) => u.email === user.value?.email && u.password === password
-    );
-    if (!foundUser) {
-      throw new Error('Password non valida');
-    }
-    foundUser.email = email;
-    user.value.email = email;
-  }
-
-  async function updatePassword(newPassword: string, currentPassword: string) {
-    if (!user.value) return;
-    const foundUser = registeredUsers.find(
-      (u) => u.email === user.value?.email && u.password === currentPassword
-    );
-    if (!foundUser) {
-      throw new Error('Password corrente non valida');
-    }
-    foundUser.password = newPassword;
-  }
-
-  function castDummyToken(id: string, configs: BaasConfigs): MySession {
-    const token = `dummy-token-${configs.endpointUrl}-${configs.projectKey}-${id}`;
-
+  mapToMyUser(user: DummyUser): MyUser {
     return {
-      token,
+      id: user.id,
+      email: user.email,
     };
   }
 
-  return {
-    user,
-    currentSession,
-    isAuthenticated,
-    init,
-    login,
-    logout,
-    signin,
-    updateEmail,
-    updatePassword,
-  };
+  mapToMySession(session: DummySession): MySession {
+    return { token: session.token };
+  }
+
+  async performInit(): Promise<BaasAuthResult<DummyUser, DummySession>> {
+    try {
+      const { user, session } = await this.dummyService.account.get();
+      return { data: { user, session }, error: null };
+    } catch (error) {
+      return { data: null, error };
+    }
+  }
+
+  async performLogin(email: string, password: string): Promise<BaasAuthResult<DummyUser, DummySession>> {
+    const { user, session } = await this.dummyService.account.login(email, password);
+    return { data: { user, session }, error: null };
+  }
+
+  async performSignup(email: string, password: string): Promise<BaasAuthResult<DummyUser, DummySession>> {
+    const { user, session } = await this.dummyService.account.signup(email, password);
+    return { data: { user, session }, error: null };
+  }
+
+  async performLogout(): Promise<OperationResult> {
+    await this.dummyService.account.logout();
+    return { error: null };
+  }
+
+  async performUpdateEmail(newEmail: string, password: string): Promise<OperationResult> {
+    await this.dummyService.account.updateEmail(newEmail, password);
+    return { error: null };
+  }
+
+  async performUpdatePassword(newPassword: string, currentPassword: string): Promise<OperationResult> {
+    await this.dummyService.account.updatePassword(newPassword, currentPassword);
+    return { error: null };
+  }
 }

@@ -1,93 +1,98 @@
 import { ref, computed } from 'vue';
-import { createClient, type User, type Session } from '@supabase/supabase-js';
+import { createClient, type User, type Session, isAuthSessionMissingError } from '@supabase/supabase-js';
 
-import type { IAuthService } from './IAuthService';
-import type { MyUser, MySession } from './Types';
+import { AuthService } from './AuthService';
+import type { MyUser, MySession, BaasAuthResult } from './Types';
 
 import type { BaasConfigs } from '../common/Types';
 import { SupabaseService } from '../common/SupabaseService';
 
-export function SupabaseAuthService(configs: BaasConfigs): IAuthService {
-  const supabase = new SupabaseService(configs);
+export class SupabaseAuthService extends AuthService<User, Session> {
+  private supabase: SupabaseService;
 
-  const user = ref<MyUser | null>(null);
-  const currentSession = ref<MySession | null>(null);
-  const isAuthenticated = computed(() => user.value !== null);
-
-  async function init(): Promise<boolean> {
-    throw new Error('Not implemented');
+  constructor(configs: BaasConfigs) {
+    super(configs);
+    this.supabase = new SupabaseService(configs);
   }
 
-  async function login(email: string, password: string) {
-    const { data, error } = await supabase.client.auth.signInWithPassword({ email, password });
-    const { user: loggedInUser, session } = data || {};
-    if (error || !loggedInUser || !session) {
-      console.error('Errore durante il login:', error);
-      return;
-    }
+  mapToMySession(session: Session): MySession {
+    return { token: session.access_token };
+  }
 
-    if (!loggedInUser.email) {
+  mapToMyUser(user: User): MyUser {
+    if (!user.email) {
       throw new Error('Email è obbligatoria');
     }
 
-    user.value = {
-      id: loggedInUser.id,
-      email: loggedInUser.email,
-    };
-    currentSession.value = {
-      token: session.access_token,
+    return {
+      id: user.id,
+      email: user.email,
     };
   }
 
-  async function logout() {
-    const { error } = await supabase.client.auth.signOut();
+  async performInit(): Promise<BaasAuthResult<User, Session>> {
+    const userResp = await this.supabase.client.auth.getUser();
+
+    if (userResp.error) {
+      if (isAuthSessionMissingError(userResp.error))
+        return { data: null, error: null }; //this is not an error, just not signed in
+
+      return { data: null, error: userResp.error };
+    }
+
+    const sessionResp = await this.supabase.client.auth.getSession();
+
+    if (sessionResp.error)
+      return { data: null, error: sessionResp.error };
+
+    // should never happen because if getUser returns a user, getSession should return a session
+    if (!sessionResp.data.session)
+      return { data: null, error: new Error('Sessione non trovata') };
+
+    return {
+      data: {
+        user: userResp.data.user,
+        session: sessionResp.data.session
+      },
+      error: null
+    };
+  }
+
+  async performLogin(email: string, password: string): Promise<BaasAuthResult<User, Session>> {
+    const { data, error } = await this.supabase.client.auth.signInWithPassword({ email, password });
+
+    if (error || !data?.user || !data.session) {
+      return { data: null, error };
+    }
+
+    return { data, error: null };
+  }
+
+  async performSignup(email: string, password: string): Promise<BaasAuthResult<User, Session>> {
+    const { data, error } = await this.supabase.client.auth.signUp({ email, password });
+
+    if (error || !data?.user || !data.session) {
+      return { data: null, error };
+    }
+
+    return { data: {user: data.user, session: data.session}, error: null };
+  }
+
+  async performLogout(): Promise<BaasAuthResult<User, Session>> {
+    const { error } = await this.supabase.client.auth.signOut();
+
     if (error) {
-      console.error('Errore durante il logout:', error);
-      return;
+      return { data: null, error };
     }
-    user.value = null;
-    currentSession.value = null;
+
+    return { data: null, error: null };
   }
 
-  async function signin(email: string, password: string) {
-    const { data, error } = await supabase.client.auth.signUp({ email, password });
-    const { user: registeredUser, session } = data;
-
-    if (error || !registeredUser || !session) {
-      console.error('Errore durante la registrazione:', error);
-      return;
-    }
-
-    if (!registeredUser.email) {
-      throw new Error('Email è obbligatoria');
-    }
-    
-    user.value = {
-      id: registeredUser.id,
-      email: registeredUser.email,
-    };
-    currentSession.value = {
-      token: session.access_token,
-    };
-  }
-
-  async function updateEmail(email: string, password: string) {
+  async performUpdateEmail(newEmail: string, password: string): Promise<BaasAuthResult<User, Session>> {
     throw new Error('Not implemented');
   }
 
-  async function updatePassword(newPassword: string, currentPassword: string) {
+  async performUpdatePassword(newPassword: string, currentPassword: string): Promise<BaasAuthResult<User, Session>> {
     throw new Error('Not implemented');
   }
-
-  return {
-    user,
-    currentSession,
-    isAuthenticated,
-    init,
-    login,
-    logout,
-    signin,
-    updateEmail,
-    updatePassword,
-  };
 }

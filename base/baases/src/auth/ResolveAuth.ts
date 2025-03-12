@@ -1,7 +1,7 @@
 import { type BaasType, ValidateBaasType } from '../common/BaasType';
 
 import type { BaasConfigs } from '../common/Types';
-import type { IAuthService } from './IAuthService';
+import type { IAuthService } from './AuthService';
 
 import { AppwriteAuthService } from './AppwriteAuthService';
 import { SupabaseAuthService } from './SupabaseAuthService';
@@ -12,9 +12,9 @@ export function ResolveAuth(type: unknown, configs: BaasConfigs): IAuthService {
   
   const getDictionary = (configs: BaasConfigs): Record<BaasType, IAuthService> => {
     return {
-      appwrite: AppwriteAuthService(configs),
-      supabase: SupabaseAuthService(configs),
-      dummy: DummyAuthService(configs),
+      appwrite: new AppwriteAuthService(configs),
+      supabase: new SupabaseAuthService(configs),
+      dummy: new DummyAuthService(configs),
     };
   }
 

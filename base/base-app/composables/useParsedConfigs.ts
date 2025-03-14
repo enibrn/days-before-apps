@@ -1,4 +1,4 @@
-import type { BaasConfigs } from '../../baases/src/common/Types';
+import type { BaasConfigs } from 'baases';
 
 export type ParsedBaasConfigs = {
   type: string;

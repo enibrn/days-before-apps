@@ -22,18 +22,18 @@ export type DummySession = {
 const registeredUsers: DummyUser[] = [
   {
     id: crypto.randomUUID(),
-    email: "dummy1@example.com",
-    password: "password1"
+    email: "1@b.in",
+    password: "pass1"
   },
   {
     id: crypto.randomUUID(),
-    email: "dummy2@example.com",
-    password: "password2"
+    email: "2@b.in",
+    password: "pass2"
   },
   {
     id: crypto.randomUUID(),
-    email: "dummy3@example.com",
-    password: "password3"
+    email: "3@b.in",
+    password: "pass3"
   }
 ];
 

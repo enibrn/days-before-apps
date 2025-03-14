@@ -1,0 +1,8 @@
+{
+  "name": "base",
+  "private": true,
+  "workspaces": [
+    "base-app",
+    "baases"
+  ]
+}

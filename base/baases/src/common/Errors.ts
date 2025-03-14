@@ -63,4 +63,16 @@ export class ParsedError {
   hasErrors() {
     return Object.keys(this.errors).length > 0 || this.otherErrorMessage !== null;
   }
+
+  printErrors(): string {
+    let errors = '';
+    for (const field in this.errors) {
+      errors += `${field}: ${this.errors[field]}\n`;
+    }
+    if (this.otherErrorMessage) {
+      errors += this.otherErrorMessage;
+    }
+    return errors;
+  }
+
 }

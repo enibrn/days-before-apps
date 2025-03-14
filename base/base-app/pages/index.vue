@@ -1,17 +1,43 @@
 <template>
   <div v-if="isAuthenticated">
-    <p>Benvenuto, {{ user.email }}!</p>
+    <p>Benvenuto, {{ user?.email }}!</p>
+    <p>Sessione corrente: {{ currentSession }}</p>
     <button @click="logout">Logout</button>
+    <form>
+      <h3>Modifica email e password:</h3>
+      <input
+        v-model="newEmail"
+        placeholder="Nuova email"
+      />
+      <input
+        v-model="pass"
+        type="password"
+        placeholder="Password attuale"
+      />
+      <input
+        v-model="newPass"
+        type="password"
+        placeholder="Nuova password"
+      />
+      <button
+        type="button"
+        @click="handleUpdateEmail()"
+      >Aggiorna email</button>
+      <button
+        type="button"
+        @click="handleUpdatePassword()"
+      >Aggiorna password</button>
+    </form>
   </div>
   <div v-else>
     <form>
       <h3>Accedi oppure registrati:</h3>
       <input
-        v-model="email"
+        v-model="newEmail"
         placeholder="Email"
       />
       <input
-        v-model="password"
+        v-model="newPass"
         type="password"
         placeholder="Password"
       />
@@ -27,30 +53,43 @@
   </div>
 </template>
 
-<script setup>
-import { ref } from 'vue';
-import { useDummyAuth } from '../../baases/src/auth/composables/useDummyAuth';
+<script setup lang="ts">
+import { useAuth } from '@/composables/useAuth';
 
-const { user, isAuthenticated, login, logout, register } = useDummyAuth();
+const {
+  user,
+  currentSession,
+  isAuthenticated,
+  init,
+  login,
+  logout,
+  signup,
+  updateEmail,
+  updatePassword
+} = useAuth();
 
-const email = ref('');
-const password = ref('');
+const newEmail = ref('');
+const pass = ref('');
+const newPass = ref('');
+
+onMounted(() => {
+  init();
+});
 
 const handleLogin = async () => {
-  try {
-    await login(email.value, password.value);
-    alert('Login avvenuto con successo!');
-  } catch (error) {
-    alert(error.message || 'Errore durante il login.');
-  }
+  await login(newEmail.value, newPass.value);
 };
 
 const handleRegister = async () => {
-  try {
-    await register(email.value, password.value);
-    alert('Registrazione completata con successo!');
-  } catch (error) {
-    alert(error.message || 'Errore durante la registrazione.');
-  }
+  await signup(newEmail.value, newPass.value);
 };
+
+const handleUpdateEmail = async () => {
+  await updateEmail(newEmail.value, pass.value);
+};
+
+const handleUpdatePassword = async () => {
+  await updatePassword(pass.value, newPass.value);
+};
+
 </script>

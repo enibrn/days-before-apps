@@ -12,7 +12,6 @@ Questo progetto contiene le interfacce e le implementazioni pensate per rendere 
 
 - nomi delle cartelle in minuscolo
 - nomi dei file in maiuscolo, pascal case
-  - Anche per i composable vue (compromesso per non aver differenze)
 - I maiuscola come prefisso delle interfacce es.: IAuth
 - File di tipo diverso nella stessa cartella, per evitare dispersione
 - Cartelle per dominio, es auth

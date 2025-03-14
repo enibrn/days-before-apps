@@ -10,14 +10,12 @@ import { DummyAuthService } from './DummyAuthService';
 export function ResolveAuth(type: unknown, configs: BaasConfigs): IAuthService {
   const safeType = ValidateBaasType(type);
   
-  const getDictionary = (configs: BaasConfigs): Record<BaasType, IAuthService> => {
-    return {
-      appwrite: new AppwriteAuthService(configs),
-      supabase: new SupabaseAuthService(configs),
-      dummy: new DummyAuthService(configs),
-    };
-  }
+  const authProviderMap: Record<BaasType, (configs: BaasConfigs) => IAuthService> = {
+    appwrite: (configs: BaasConfigs) => new AppwriteAuthService(configs),
+    supabase: (configs: BaasConfigs) => new SupabaseAuthService(configs),
+    dummy: (configs: BaasConfigs) => new DummyAuthService(configs),
+  };
 
-  const dictionary = getDictionary(configs);
-  return dictionary[safeType];
+  const authProviderFactory = authProviderMap[safeType];
+  return authProviderFactory(configs);
 }

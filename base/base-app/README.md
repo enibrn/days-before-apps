@@ -12,3 +12,12 @@ Questo progetto rappresenta l'app base che gestisce il workflow di login e signi
 ## Convenzioni
 
 - seguire le convenzioni di nuxt 3 e vue 3
+  - cartelle chiamate come i valori di default di nuxt
+  - composable del tipo useAuth.ts (dentro di essi un solo export es export function useAuth)
+  - viste in pages camelCase
+  - componenti in components PascalCase
+
+## Riutilizzabilità
+
+- base-app è possibile eseguirla stand alone, in conformità con il pattern dei microfrontend, ma in realtà non dovrebbe mai essere estesa direttamente da un app reale
+- ha un css minimale ([https://simplecss.org/](SimpleCss)) referenziato direttamente da app.vue, così non verrà utilizzato dalle app che estenderanno base-app
